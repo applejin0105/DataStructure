@@ -43,8 +43,8 @@ public:
 		bool operator!=(const Iterator other) const { return index != other.index; }
 	};
 
-	Iterator begin() { return Iterator(queue+front); }
-	Iterator end() { return Iterator(queue + rear); }
+	Iterator begin() { return Iterator(this, 0); }
+	Iterator end() { return Iterator(this, size); }
 
 private:
 	T* queue;
