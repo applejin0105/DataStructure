@@ -30,7 +30,7 @@ public:
 
 		T& operator*()
 		{
-			int actualIndex = (queueRef->front + index) & queueRef->capacity;
+			int actualIndex = (queueRef->front + index) % queueRef->capacity;
 			return queueRef->queue[actualIndex];
 		}
 		Iterator& operator++()
