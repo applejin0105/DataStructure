@@ -5,7 +5,33 @@ static const int DEFAULT_CAPACITY = 1024 * 1024 * 4;
 template<typename T>
 class LinkedList
 {
+	struct Node
+	{
+		T data;
+		Node* next;
+		Node* prev;
+
+		Node(T& value) : data(value), prev(nullptr), next(nullptr) {}
+	};
+
 public:
+	class Iterator
+	{
+	public:
+		Iterator(Node* start) : current(start) {}
+
+		T& operator*() { return current->data; }
+		Iterator& operator++() { if (current) cuurrent = current->next; return *this; }
+
+		bool operator==(const Iterator& other) const { return current == other.current; }
+		bool operator!=(const Iterator& other) const { return current != other.current; }
+	private:
+		Node* current;
+	};
+
+	Iterator begin() { return Iterator(head); }
+	Iterator end() { return Iterator(nullptr); }
+
 	LinkedList() : head(nullptr), tail(nullptr), size(0);
 	~LinkedList() { Clear(); }
 
@@ -24,34 +50,7 @@ public:
 	int Size() const;
 	bool IsEmpty() const;
 
-	class Iterator
-	{
-	private:
-		Node* current;
-
-	public:
-		Iterator(Node* start) : current(start) {}
-
-		T& operator*() { return current->data; }
-		Iterator& operator++() { if (current) cuurrent = current->next; return *this; }
-		
-		bool operator==(const Iterator& other) cosnt { return current == other.current; }
-		bool operator!=(const Iterator& other) const { return current != other.current; }
-	};
-
-	Iterator begin() { return Iterator(head); }
-	Iterator end() { return Iterator(nullptr); }
-
 private:
-	struct Node
-	{
-		T data;
-		Node* next;
-		Node* prev;
-
-		Node(T& value) : data(value), prev(nullptr), next(nullptr) {}
-	};
-
 	Node<T>* head;
 	Node<T>* tail;
 	int size;
@@ -60,7 +59,7 @@ private:
 };
 
 template<typename T>
-LinkedList<T>::LinkedList()
+LinkedList<T>::LinkedList() : head(nullptr), tail(nullptr), size(0)
 {
 	head = nullptr;
 	tail = nullptr;

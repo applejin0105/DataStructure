@@ -30,9 +30,6 @@ public:
 
 	class Iterator
 	{
-	private:
-		T* m_ptr;
-
 	public:
 		Iterator(T* ptr) : m_ptr(ptr) {}
 
@@ -42,6 +39,8 @@ public:
 		bool operator==(const Iterator& other) const { return m_ptr == other.m_ptr; }
 		bool operator!=(const Iterator& other) const { return m_ptr != other.m_ptr; }
 
+	private:
+		T* m_ptr;
 	};
 
 	Iterator begin() { return Iterator(array); }

@@ -6,19 +6,6 @@ template<typename T>
 class Queue
 {
 public:
-	Queue();
-	~Queue();
-
-	int Capacity() const;
-	bool IsEmpty() const;
-	bool IsFull() const;
-	bool Enqueue(T value);
-	bool Dequeue(T& out);
-	bool Front(T& out) const;
-	int Size() const;
-
-	T& operator[](int i);
-
 	class Iterator
 	{
 	private:
@@ -36,7 +23,7 @@ public:
 		Iterator& operator++()
 		{
 			index++;
-			return *this; 
+			return *this;
 		}
 
 		bool operator==(const Iterator other) const { return index == other.index; }
@@ -45,6 +32,19 @@ public:
 
 	Iterator begin() { return Iterator(this, 0); }
 	Iterator end() { return Iterator(this, size); }
+
+	Queue() : queue(nullptr), front(0), rear(-1), capacity(0), size(0);
+	~Queue();
+
+	int Capacity() const;
+	bool IsEmpty() const;
+	bool IsFull() const;
+	bool Enqueue(T value);
+	bool Dequeue(T& out);
+	bool Front(T& out) const;
+	int Size() const;
+
+	T& operator[](int i);
 
 private:
 	T* queue;

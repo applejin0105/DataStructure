@@ -6,20 +6,6 @@ template<typename T>
 class Stack
 {
 public:
-	Stack() : stack(nullptr), top(-1), capacity(0);
-	~Stack() { Clear(); }
-
-	int Capacity() const;
-	bool IsEmpty() const;
-	bool IsFull() const;
-	bool Push(T value);
-	bool Pop(T& out);
-	bool Peek(T& out) const;
-	int Size() const;
-	void Clear();
-
-	T& operator[](int i);
-
 	class Iterator
 	{
 	private:
@@ -47,6 +33,20 @@ public:
 	Iterator begin() { return Iterator(this, 0); }
 	Iterator end() { return Iterator(this, top + 1); }
 
+	Stack();
+	~Stack();
+
+	int Capacity() const;
+	bool IsEmpty() const;
+	bool IsFull() const;
+	bool Push(T value);
+	bool Pop(T& out);
+	bool Peek(T& out) const;
+	int Size() const;
+	void Clear();
+
+	T& operator[](int i);
+
 private:
 	T* stack;
 	int top;
@@ -71,7 +71,7 @@ Stack<T>::~Stack()
 }
 
 template<typename T>
-inline int Stack<T>::Capacity() const
+int Stack<T>::Capacity() const
 {
 	return capacity;
 }
@@ -146,9 +146,12 @@ int Stack<T>::Size() const
 }
 
 template<typename T>
-inline void Stack<T>::Clear()
+void Stack<T>::Clear()
 {
+	delete[] stack;
+	stack = nullptr;
 	top = -1;
+	capacity = 0;
 }
 
 template<typename T>
