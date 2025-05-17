@@ -61,7 +61,7 @@ template<typename K, typename V>
 bool BST<K, V>::Search(K key, V& out) const
 {
 	Node* result = Search(root, key);
-	if (out != nullptr)
+	if (result != nullptr)
 	{
 		out = result->value;
 		return true;
