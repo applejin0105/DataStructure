@@ -28,12 +28,11 @@ public:
 
 	};
 
-
 private:
 	Node* Insert(Node* node, K key, V value);
 	Node* Remove(Node* node, K key);
 	Node* FindMin(Node* node);
-	Node* Search(Node* node, K key);
+	Node* Search(Node* node, K key) const;
 	void DeleteTree(Node* node);
 };
 
@@ -53,8 +52,9 @@ bool BST<K, V>::Insert(K key, V value)
 template<typename K, typename V>
 bool BST<K, V>::Remove(K key)
 {
-	if (Remove(root, key) != nullptr) return true;
-	return false;
+	if (!Search(root, key)) return false;
+	root = Remove(root, key);
+	return true;
 }
 
 template<typename K, typename V>
@@ -128,6 +128,7 @@ typename BST<K, V>::Node* BST<K, V>::Remove(Node* node, K key)
 			Node* successor = FindMin(node->right);
 			node->key = successor->key;
 			node->value = successor->value;
+
 			node->right = Remove(node->right, successor->key);
 		}
 	}
@@ -144,15 +145,15 @@ typename BST<K, V>::Node* BST<K, V>::FindMin(Node* node)
 }
 
 template<typename K, typename V>
-typename BST<K, V>::Node* BST<K, V>::Search(Node* node, K key)
+typename BST<K, V>::Node* BST<K, V>::Search(Node* node, K key) const
 {
 	if (node == nullptr)
 		return nullptr;
 
 	if (key < node->key)
-		node->left = Search(node->left, key);
+		return Search(node->left, key);
 	else if (key > node->key)
-		node->right = Search(node->right, key);
+		return Search(node->right, key);
 	else
 		return node;
 }
