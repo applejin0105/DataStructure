@@ -23,10 +23,11 @@ public:
 	bool Search(K key, V& out) const;
 	void Clear();
 
-	class Iterator
+	template<typename F>
+	void TraverseInOrder(F&& visit) const
 	{
-
-	};
+		BST<K, V>::TraverseInOrder(root, visit);
+	}
 
 private:
 	Node* Insert(Node* node, K key, V value);
@@ -34,6 +35,15 @@ private:
 	Node* FindMin(Node* node);
 	Node* Search(Node* node, K key) const;
 	void DeleteTree(Node* node);
+
+	template<typename F>
+	void TraverseInOrder(Node* node, F&& visit) const
+	{
+		if (node == nullptr) return;
+		this->TraverseInOrder(node->left, visit);
+		visit(node->key, node->value);
+		this->TraverseInOrder(node->right, visit);
+	}
 };
 
 template<typename K, typename V>
