@@ -1,285 +1,290 @@
 #pragma once
-
 static const int MAX_CAPACITY = 1024 * 1024 * 10;
 static const int DEFAULT_CAPACITY = 1024 * 1024 * 4;
 
 template<typename T>
-class Array
+class LinkedList
 {
+	struct Node
+	{
+		T data;
+		Node* next;
+		Node* prev;
+
+		Node(T& value) : data(value), prev(nullptr), next(nullptr) {}
+	};
+
 public:
-	Array();
-	~Array();
-
-	Array(const Array& other);
-	Array& operator=(const Array& other);
-
-	int Capacity() const;
-	bool IsFull() const;
-	bool IsEmpty() const;
-
-	bool Get(int index, T& out) const;
-	void Set(int index, const T& value);
-
-	bool Add(const T& value);
-	bool Insert(int index, const T& value);
-
-	bool Remove(const T& value);
-	bool RemoveAt(int index);
-
-	bool IndexOf(const T& value, int& out) const;
-	bool Contains(const T& value) const;
-
-	void Clear(bool resetMemory = false);
-
 	class Iterator
 	{
 	public:
-		Iterator(T* ptr) : m_ptr(ptr) {}
+		Iterator(Node* start) : current(start) {}
 
-		T& operator*() { return *m_ptr; }
-		Iterator& operator++() { ++m_ptr; return *this; }
+		T& operator*() { return current->data; }
+		Iterator& operator++() { if (current) cuurrent = current->next; return *this; }
 
-		bool operator==(const Iterator& other) const { return m_ptr == other.m_ptr; }
-		bool operator!=(const Iterator& other) const { return m_ptr != other.m_ptr; }
-
+		bool operator==(const Iterator& other) const { return current == other.current; }
+		bool operator!=(const Iterator& other) const { return current != other.current; }
 	private:
-		T* m_ptr;
+		Node* current;
 	};
 
-	Iterator begin() { return Iterator(array); }
-	Iterator end() { return Iterator(array + size); }
+	Iterator begin() { return Iterator(head); }
+	Iterator end() { return Iterator(nullptr); }
+
+	LinkedList() : head(nullptr), tail(nullptr), size(0);
+	~LinkedList() { Clear(); }
+
+	void AddFront(T value);
+	void AddBack(T value);
+	bool Insert(int index, T value);
+
+	bool Remove(T value);
+	bool RemoveAt(int index);
+
+	bool Get(int index, T& out);
+	bool Contains(T value);
+	bool IndexOf(T value, int& out);
+	void Clear();
+
+	int Size() const;
+	bool IsEmpty() const;
 
 private:
-	T* array;
-	int capacity;
+	Node<T>* head;
+	Node<T>* tail;
 	int size;
 
-	void Resize(int newCapacity);
+	void Resize();
 };
 
 template<typename T>
-Array<T>::Array() : array(nullptr), size(0)
+LinkedList<T>::LinkedList() : head(nullptr), tail(nullptr), size(0)
 {
-	capacity = DEFAULT_CAPACITY / sizeof(T);
-	array = new T[capacity];
+	head = nullptr;
+	tail = nullptr;
+	size = 0;
 }
 
 template<typename T>
-Array<T>::Array(const Array& other) : size(other.size), capacity(other.capacity)
+LinkedList<T>::~LinkedList()
 {
-	array = new T[capacity];
-	for (int i = 0; i < size; i++)
-	{
-		array[i] = other.array[i];
-	}
+	Clear();
 }
 
 template<typename T>
-Array<T>::~Array()
+void LinkedList<T>::AddFront(T value)
 {
-	delete[] array;
-}
+	// newNode 자체는 지역 포인터 변수 -> AddFront 함수가 끝나면 이 포인터만 사라진다.
+	// newNode<T>(value)로 만든 노드 객체는 힙 메모리에 살아있다.
+	Node<T>* newNode = new Node<T>(value);
+	newNode->next = head;
 
-template<typename T>
-Array<T>& Array<T>::operator=(const Array& other)
-{
-	if (this == &other)
-		return *this;
+	if(!IsEmpty())
+		head->prev = newNode;
 
-	delete[] array;
-
-	size = other.size;
-	capacity = other.capacity;
-	array = new T[capacity];
-
-	for (int i = 0; i < size; i++)
-	{
-		array[i] = other.array[i];
-	}
-
-	return *this;
-}
-
-template<typename T>
-int Array<T>::Capacity() const
-{
-	return capacity;
-}
-
-template<typename T>
-bool Array<T>::IsFull() const
-{
-	return (size == capacity);
-}
-
-template<typename T>
-bool Array<T>::IsEmpty() const
-{
-	return (size == 0);
-}
-
-template<typename T>
-bool Array<T>::Get(int index, T& out) const
-{
-	if (index < 0 || index >= size)
-		return false;
-	out = array[index];
-	return true;
-}
-
-template<typename T>
-void Array<T>::Set(int index, const T& value)
-{
-	if (index < 0 || index >= size)
-		return;
-	array[index] = value;
-}
-
-template<typename T>
-bool Array<T>::Add(const T& value)
-{
-	if (IsFull())
-	{
-		int maxCapacity = MAX_CAPACITY / sizeof(T);
-		if (capacity < maxCapacity)
-		{
-			int nextCapacity = capacity * 2;
-			if (nextCapacity > maxCapacity)
-				nextCapacity = maxCapacity;
-
-			Resize(nextCapacity);
-		}
-		if (IsFull())
-		{
-			return false;
-		}
-	}
-
-	array[size] = value;
+	head = newNode;
 	size++;
-	return true;
 }
 
 template<typename T>
-bool Array<T>::Insert(int index, const T& value)
+void LinkedList<T>::AddBack(T value)
 {
-	if (index < 0 || index > size)
+	Node<T>* newNode = new Node<T>(value);
+
+	if (IsEmpty())
+	{
+		head = newNode;
+	}
+	else
+	{
+		Node<T>* current = head;
+		while (current->next != nullptr)
+		{
+			current = current->next;
+		}
+		current->next = newNode;
+		newNode->prev = current;
+	}
+	size++;
+}
+
+template<typename T>
+bool LinkedList<T>::Insert(int index, T value)
+{
+	if (index == 0)
+	{
+		AddFront(value);
+		return true;
+	}
+	else if (index == size)
+	{
+		AddBack(value);
+		return true;
+	}
+	else if (index > size)
 	{
 		return false;
 	}
 
-	if (IsFull())
-	{
-		int maxCapacity = MAX_CAPACITY / sizeof(T);
-		if (capacity < maxCapacity)
-		{
-			int nextCapacity = capacity * 2;
-			if (nextCapacity > maxCapacity)
-				nextCapacity = maxCapacity;
+	Node<T>* currentNode = head;
 
-			Resize(nextCapacity);
-		}
-		if (IsFull())
-		{
-			return false;
-		}
-	}
+	Node<T>* preNode = head;
+	Node<T>* subNode;
 
-	for (int i = size; i > index; i--)
+	Node<T>* newNode = new Node<T>(value);
+
+	for (int i = 0; i < index; i++)
 	{
-		array[i] = array[i - 1];
+		current = current->next;
 	}
-	array[index] = value;
-	size++;
+	
+	subNode = preNode->next;
+	preNode->next = newNode;
+	newNode->prev = preNode;
+	newNode->next = subNode;
+	subNode->prev = newNode;
+
 	return true;
 }
 
 template<typename T>
-bool Array<T>::Remove(const T& value)
+bool LinkedList<T>::Remove(T value)
 {
 	if (IsEmpty())
 	{
 		return false;
 	}
 
-	int index;
-	if (IndexOf(value, index))
+	Node<T>* currentNode = head;
+
+	while (currentNode->data != value)
 	{
-		return RemoveAt(index);
+		if (currentNode->next == nullptr)
+		{
+			return false;
+		}
+		currentNode = currentNode->next;
 	}
-	return false;
+
+	Node<T>* preNode = currentNode->prev;
+	Node<T>* subNode = currentNode->next;
+
+	preNode->next = subNode;
+	subNode->prev = preNode;
+
+	size--;
+
+	return true;
 }
 
 template<typename T>
-bool Array<T>::RemoveAt(int index)
+bool LinkedList<T>::RemoveAt(int index)
 {
-	if (IsEmpty() || index < 0 || (index >= size))
+	if (IsEmpty() || index >= Size())
 	{
 		return false;
 	}
 
-	for (int i = index; i < size - 1; i++)
+	Node<T>* currentNode = head;
+
+	for (int i = 0; i < index; i++)
 	{
-		array[i] = array[i + 1];
+		currentNode = currentNode->next;
 	}
+
+	Node<T>* preNode = currentNode->prev;
+	Node<T>* subNode = currentNode->next;
+
+	preNode->next = subNode;
+	subNode->prev = preNode;
 
 	size--;
 
-	if (size <= capacity / 4 && capacity > (DEFAULT_CAPACITY / sizeof(T)))
+	return false;
+}
+
+template<typename T>
+bool LinkedList<T>::Get(int index, T& out)
+{
+	if (index > Size())
+		return false;
+
+	Node<T>* currentNode = head;
+
+	for (int i = 0; i < index; i++)
 	{
-		Resize(capacity / 2);
+		currentNode = currentNode->next;
+	}
+	out = currentNode->data;
+	return true;
+}
+
+template<typename T>
+bool LinkedList<T>::Contains(T value)
+{
+	Node<T>* currentNode = head;
+
+	while (currentNode->data != value)
+	{
+		if (currentNode->next == nullptr)
+		{
+			return false;
+		}
+		currentNode = currentNode->next;
 	}
 	return true;
 }
 
 template<typename T>
-bool Array<T>::IndexOf(const T& value, int& out) const
+bool LinkedList<T>::IndexOf(T value, int& out)
 {
-	for (int i = 0; i < size; i++)
+	Node<T>* currentNode = head;
+	int index = 0;
+
+	while (currentNode->data != value)
 	{
-		if (array[i] == value)
+		if (currentNode->next == nullptr)
 		{
-			out = i;
-			return true;
+			return false;
 		}
+		currentNode = currentNode->next;
+		index++;
 	}
-	return false;
+	out = index;
+	return true;
 }
 
 template<typename T>
-bool Array<T>::Contains(const T& value) const
+void LinkedList<T>::Clear()
 {
-	int unusedIndex = -1;
-	return IndexOf(value, unusedIndex);
-}
+	Node<T>* current = head;
 
-template<typename T>
-void Array<T>::Clear(bool resetMemory)
-{
+	while (current != nullptr)
+	{
+		Node<T>* next = current->next;
+		delete current;
+		current = next;
+	}
+	head = nullptr;
+	tail = nullptr;
 	size = 0;
-
-	if (resetMemory)
-	{
-		delete[] array;
-		array = new T[DEFAULT_CAPACITY / sizeof(T)];
-		capacity = DEFAULT_CAPACITY / sizeof(T);
-	}
 }
 
 template<typename T>
-void Array<T>::Resize(int newCapacity)
+int LinkedList<T>::Size() const
 {
-	if (capacity == newCapacity) return;
+	return size;
+}
 
-	T* newArray = new T[newCapacity];
+template<typename T>
+bool LinkedList<T>::IsEmpty() const
+{
+	return (head == nullptr);
+}
 
-	for (int i = 0; i < size; i++)
-	{
-		newArray[i] = array[i];
-	}
-
-	delete[] array;
-
-	array = newArray;
-	capacity = newCapacity;
+template<typename T>
+void LinkedList<T>::Resize()
+{
+	return -1;
 }
