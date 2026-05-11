@@ -103,20 +103,8 @@ HashTable<K, V>::HashTable() : table(nullptr), size(0)
 template<typename K, typename V>
 HashTable<K, V>::~HashTable()
 {
-	if (table != nullptr)
-	{
-		for (int i = 0; i < TABLE_SIZE; ++i)
-		{
-			HashNode* node = table[i];
-			if (node != nullptr)
-			{
-				HashNode* next = node->next;
-				delete node;
-				node = next;
-			}
-		}
-		delete[] table;
-	}
+	Clear();
+	delete[] table;
 }
 
 template<typename K, typename V>
