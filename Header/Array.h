@@ -15,12 +15,12 @@ public:
 	bool IsEmpty() const;
 
 	bool Get(int index, T& out) const;
-	void Set(int index, T value);
+	void Set(int index, const T& value);
 
 	bool Add(const T& value);
 	bool Insert(int index, const T& value);
 
-	bool Remove(T value);
+	bool Remove(const T& value);
 	bool RemoveAt(int index);
 
 	bool IndexOf(const T& value, int& out) const;
@@ -52,7 +52,6 @@ private:
 	int size;
 
 	void Resize(int newCapacity);
-
 };
 
 template<typename T>
@@ -60,16 +59,6 @@ Array<T>::Array() : array(nullptr), size(0)
 {
 	capacity = DEFAULT_CAPACITY / sizeof(T);
 	array = new T[capacity];
-}
-
-template<typename T>
-Array<T>::Array(const Array& other) : size(other.size), capacity(other.capacity)
-{
-	array = new T[capacity];
-	for (int i = 0; i < size; i++)
-	{
-		array[i] = other.array[i];
-	}
 }
 
 template<typename T>
@@ -98,7 +87,7 @@ bool Array<T>::IsEmpty() const
 }
 
 template<typename T>
-bool Array<T>::Get(int index, T& out)
+bool Array<T>::Get(int index, T& out) const
 {
 	if (index < 0 || index >= size)
 		return false;
@@ -107,7 +96,7 @@ bool Array<T>::Get(int index, T& out)
 }
 
 template<typename T>
-void Array<T>::Set(int index, T value)
+void Array<T>::Set(int index, const T& value)
 {
 	if (index < 0 || index >= size)
 		return;
@@ -115,17 +104,13 @@ void Array<T>::Set(int index, T value)
 }
 
 template<typename T>
-bool Array<T>::Add(T value)
+bool Array<T>::Add(const T& value)
 {
 	if (IsFull())
 	{
 		if (capacity < (MAX_CAPACITY / sizeof(T)))
 		{
-			int nextCapacity = capacity * 2;
-			if (nextCapacity > maxCapacity)
-				nextCapacity = maxCapacity;
-
-			Resize(nextCapacity);
+			Resize(capacity * 2);
 		}
 		if (IsFull())
 		{
@@ -139,7 +124,7 @@ bool Array<T>::Add(T value)
 }
 
 template<typename T>
-bool Array<T>::Insert(int index, T value)
+bool Array<T>::Insert(int index, const T& value)
 {
 	if (index < 0 || index > size)
 	{
@@ -156,7 +141,6 @@ bool Array<T>::Insert(int index, T value)
 		{
 			return false;
 		}
-
 	}
 
 	for (int i = size; i > index; i--)
@@ -172,14 +156,16 @@ template<typename T>
 bool Array<T>::Remove(const T& value)
 {
 	if (IsEmpty())
+	{
 		return false;
+	}
 
 	int index;
 	if (IndexOf(value, index))
 	{
-		return RemoveAt(index);
+		RemoveAt(index);
 	}
-	return false;
+	return true;
 }
 
 template<typename T>
@@ -197,7 +183,6 @@ bool Array<T>::RemoveAt(int index)
 
 	size--;
 
-	// 단순히 size <= capacity / 2일 때 줄이면 너무 자주 Resize 발생, 성능저하.
 	if (size <= capacity / 4 && capacity > (DEFAULT_CAPACITY / sizeof(T)))
 	{
 		Resize(capacity / 2);
@@ -206,7 +191,7 @@ bool Array<T>::RemoveAt(int index)
 }
 
 template<typename T>
-bool Array<T>::IndexOf(T value, int& out)
+bool Array<T>::IndexOf(const T& value, int& out) const
 {
 	for (int i = 0; i < size; i++)
 	{
@@ -220,7 +205,7 @@ bool Array<T>::IndexOf(T value, int& out)
 }
 
 template<typename T>
-bool Array<T>::Contains(const T& value)
+bool Array<T>::Contains(const T& value) const
 {
 	int unusedIndex = -1;
 	return IndexOf(value, unusedIndex);
@@ -255,26 +240,4 @@ void Array<T>::Resize(int newCapacity)
 
 	array = newArray;
 	capacity = newCapacity;
-}
-
-template<typename T>
-Array<T>& Array<T>::operator=(const Array& other)
-{
-	if (this == &other)
-	{
-		return *this;
-	}
-
-	delete[] array;
-
-	size = other.size;
-	capacity = other.capacity;
-	array = new T[capacity];
-
-	for (int i = 0; i < size; i++)
-	{
-		array[i] = other.array[i];
-	}
-
-	return *this;
 }
