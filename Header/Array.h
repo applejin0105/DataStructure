@@ -7,24 +7,24 @@ template<typename T>
 class Array
 {
 public:
-	Array() : array(nullptr), size(0);
+	Array();
 	~Array();
 
 	int Capacity() const;
 	bool IsFull() const;
 	bool IsEmpty() const;
 
-	bool Get(int index, T& out);
+	bool Get(int index, T& out) const;
 	void Set(int index, T value);
 
-	bool Add(T value);
-	bool Insert(int index, T value);
+	bool Add(const T& value);
+	bool Insert(int index, const T& value);
 
 	bool Remove(T value);
 	bool RemoveAt(int index);
 
-	bool IndexOf(T value, int& out);
-	bool Contains(const T& value);
+	bool IndexOf(const T& value, int& out) const;
+	bool Contains(const T& value) const;
 
 	void Clear(bool resetMemory = false);
 
@@ -60,6 +60,16 @@ Array<T>::Array() : array(nullptr), size(0)
 {
 	capacity = DEFAULT_CAPACITY / sizeof(T);
 	array = new T[capacity];
+}
+
+template<typename T>
+Array<T>::Array(const Array& other) : size(other.size), capacity(other.capacity)
+{
+	array = new T[capacity];
+	for (int i = 0; i < size; i++)
+	{
+		array[i] = other.array[i];
+	}
 }
 
 template<typename T>
@@ -111,7 +121,11 @@ bool Array<T>::Add(T value)
 	{
 		if (capacity < (MAX_CAPACITY / sizeof(T)))
 		{
-			Resize(capacity * 2);
+			int nextCapacity = capacity * 2;
+			if (nextCapacity > maxCapacity)
+				nextCapacity = maxCapacity;
+
+			Resize(nextCapacity);
 		}
 		if (IsFull())
 		{
@@ -155,19 +169,17 @@ bool Array<T>::Insert(int index, T value)
 }
 
 template<typename T>
-bool Array<T>::Remove(T value)
+bool Array<T>::Remove(const T& value)
 {
 	if (IsEmpty())
-	{
 		return false;
-	}
 
 	int index;
 	if (IndexOf(value, index))
 	{
-		RemoveAt(index);
+		return RemoveAt(index);
 	}
-	return true;
+	return false;
 }
 
 template<typename T>
@@ -243,4 +255,26 @@ void Array<T>::Resize(int newCapacity)
 
 	array = newArray;
 	capacity = newCapacity;
+}
+
+template<typename T>
+Array<T>& Array<T>::operator=(const Array& other)
+{
+	if (this == &other)
+	{
+		return *this;
+	}
+
+	delete[] array;
+
+	size = other.size;
+	capacity = other.capacity;
+	array = new T[capacity];
+
+	for (int i = 0; i < size; i++)
+	{
+		array[i] = other.array[i];
+	}
+
+	return *this;
 }
