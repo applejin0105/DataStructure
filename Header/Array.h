@@ -10,6 +10,9 @@ public:
 	Array();
 	~Array();
 
+	Array(const Array& other);
+	Array& operator=(const Array& other);
+
 	int Capacity() const;
 	bool IsFull() const;
 	bool IsEmpty() const;
@@ -62,10 +65,39 @@ Array<T>::Array() : array(nullptr), size(0)
 }
 
 template<typename T>
+Array<T>::Array(const Array& other) : size(other.size), capacity(other.capacity)
+{
+	array = new T[capacity];
+	for (int i = 0; i < size; i++)
+	{
+		array[i] = other.array[i];
+	}
+}
+
+template<typename T>
 Array<T>::~Array()
 {
-	if(array)
-		delete[] array;
+	delete[] array;
+}
+
+template<typename T>
+Array<T>& Array<T>::operator=(const Array& other)
+{
+	if (this == &other)
+		return *this;
+
+	delete[] array;
+
+	size = other.size;
+	capacity = other.capacity;
+	array = new T[capacity];
+
+	for (int i = 0; i < size; i++)
+	{
+		array[i] = other.array[i];
+	}
+
+	return *this;
 }
 
 template<typename T>
@@ -108,9 +140,14 @@ bool Array<T>::Add(const T& value)
 {
 	if (IsFull())
 	{
-		if (capacity < (MAX_CAPACITY / sizeof(T)))
+		int maxCapacity = MAX_CAPACITY / sizeof(T);
+		if (capacity < maxCapacity)
 		{
-			Resize(capacity * 2);
+			int nextCapacity = capacity * 2;
+			if (nextCapacity > maxCapacity)
+				nextCapacity = maxCapacity;
+
+			Resize(nextCapacity);
 		}
 		if (IsFull())
 		{
@@ -133,9 +170,14 @@ bool Array<T>::Insert(int index, const T& value)
 
 	if (IsFull())
 	{
-		if (capacity < (MAX_CAPACITY / sizeof(T)))
+		int maxCapacity = MAX_CAPACITY / sizeof(T);
+		if (capacity < maxCapacity)
 		{
-			Resize(capacity * 2);
+			int nextCapacity = capacity * 2;
+			if (nextCapacity > maxCapacity)
+				nextCapacity = maxCapacity;
+
+			Resize(nextCapacity);
 		}
 		if (IsFull())
 		{
@@ -163,9 +205,9 @@ bool Array<T>::Remove(const T& value)
 	int index;
 	if (IndexOf(value, index))
 	{
-		RemoveAt(index);
+		return RemoveAt(index);
 	}
-	return true;
+	return false;
 }
 
 template<typename T>
