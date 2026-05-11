@@ -21,7 +21,7 @@ public:
 		Iterator(Node* start) : current(start) {}
 
 		T& operator*() { return current->data; }
-		Iterator& operator++() { if (current) cuurrent = current->next; return *this; }
+		Iterator& operator++() { if (current) current = current->next; return *this; }
 
 		bool operator==(const Iterator& other) const { return current == other.current; }
 		bool operator!=(const Iterator& other) const { return current != other.current; }
@@ -128,23 +128,22 @@ bool LinkedList<T>::Insert(int index, T value)
 	}
 
 	Node<T>* currentNode = head;
-
-	Node<T>* preNode = head;
-	Node<T>* subNode;
-
-	Node<T>* newNode = new Node<T>(value);
-
 	for (int i = 0; i < index; i++)
 	{
-		current = current->next;
+		currentNode = currentNode->next;
 	}
 	
-	subNode = preNode->next;
+	Node<T>* preNode = currentNode->prev;
+	
+	Node<T>* newNode = new Node<T>(value);
+
 	preNode->next = newNode;
 	newNode->prev = preNode;
-	newNode->next = subNode;
-	subNode->prev = newNode;
 
+	newNode->next = currentNode;
+	currentNode->prev = newNode;
+
+	size++;
 	return true;
 }
 
