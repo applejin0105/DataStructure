@@ -65,8 +65,6 @@ Stack<T>::Stack() : stack(nullptr), top(-1), capacity(0)
 template<typename T>
 Stack<T>::~Stack()
 {
-	if(stack)
-		delete[] stack;
 	Clear();
 }
 
