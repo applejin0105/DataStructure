@@ -149,7 +149,7 @@ void Stack<T>::Clear()
 	delete[] stack;
 	stack = nullptr;
 	top = -1;
-	capacity = 0;
+	capacity = DEFAULT_CAPACITY;
 }
 
 template<typename T>
