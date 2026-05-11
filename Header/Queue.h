@@ -33,7 +33,7 @@ public:
 	Iterator begin() { return Iterator(this, 0); }
 	Iterator end() { return Iterator(this, size); }
 
-	Queue() : queue(nullptr), front(0), rear(-1), capacity(0), size(0);
+	Queue();
 	~Queue();
 
 	int Capacity() const;
